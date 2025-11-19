@@ -1,25 +1,34 @@
 package com.sdsmdg.harjot.rotatingtextlibrary;
 
+import static java.security.AccessController.getContext;
+
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+
 import android.text.TextUtils;
 
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
+
 import com.sdsmdg.harjot.rotatingtext.RotatingTextSwitcher;
 import com.sdsmdg.harjot.rotatingtext.RotatingTextWrapper;
 import com.sdsmdg.harjot.rotatingtext.models.Rotatable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,11 +50,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         rotatingTextSwitcher = new RotatingTextSwitcher(this);
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Raleway-Light.ttf");
-        Typeface typeface2 = Typeface.createFromAsset(getAssets(), "fonts/Reckoner_Bold.ttf");
+
+        //Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Raleway-Light.ttf");
+      //  Typeface typeface2 = Typeface.createFromAsset(getAssets(), "fonts/Reckoner_Bold.ttf");
 
         rotatingTextWrapper = findViewById(R.id.custom_switcher);
-        rotatingTextWrapper.setSize(30);
+        setRotating(rotatingTextWrapper,10);
+        /*rotatingTextWrapper.setSize(30);
         rotatingTextWrapper.setTypeface(typeface2);
 
 //        rotatable = new Rotatable(Color.parseColor("#FFA036"), 1000, "Word00", "Word01", "Word02");
@@ -54,22 +65,21 @@ public class MainActivity extends AppCompatActivity {
         rotatable.setTypeface(typeface);
         rotatable.setInterpolator(new AccelerateInterpolator());
         rotatable.setAnimationDuration(500);
-
+*//*
         rotatable2 = new Rotatable(Color.parseColor("#123456"), 1000, "word", "word01", "word02");
         rotatable2.setSize(25);
         rotatable2.setTypeface(typeface);
         rotatable2.setInterpolator(new DecelerateInterpolator());
         rotatable2.setAnimationDuration(500);
+*/
+        //word = rotatable.getTextAt(0);
 
-
-        word = rotatable.getTextAt(0);
-
-        rotatingTextWrapper.setContent("?abc ? abc", rotatable, rotatable2);
+       // rotatingTextWrapper.setContent("?abc ? abc", rotatable, rotatable2);
 //        rotatingTextWrapper.setContent("? abc", rotatable);
 
         s1 = (Spinner) findViewById(R.id.spinner);
 
-
+/*
 
         List<Integer> list = new ArrayList<Integer>();
         list.add(1);
@@ -125,8 +135,32 @@ public class MainActivity extends AppCompatActivity {
                 rotatable2.setApplyHorizontal(!apply);
             }
         });
+
+ */
     }
 
+    private void setRotating(RotatingTextWrapper wrapper, int toCount) {
+
+        Typeface typeface = ResourcesCompat.getFont(this, R.font.love);
+        wrapper.setSize(38);
+        wrapper.setTypeface(typeface);
+        //Log.d(TAG, Arrays.toString(createTextListForInteger(toCount)));
+        Rotatable rotatable = new Rotatable(Color.parseColor("#FFA036"), 1000, "1","2","3");
+        rotatable.setAnimationDuration(500);
+        rotatable.setCenter(true);
+        rotatable.setTypeface(typeface);
+        rotatable.setInterpolator(new BounceInterpolator());
+
+        wrapper.setContent("?", rotatable);
+
+    }
+
+    private String[] createTextListForInteger(int n) {
+        List<String> integerList = IntStream.rangeClosed(0, n)
+                .boxed()
+                .map(i -> i.toString()).toList();
+        return integerList.toArray(new String[]{});
+    }
     public void replaceWord(View view) {
         String newWord = e1.getText().toString();
         if (TextUtils.isEmpty(newWord)) e1.setText("can't be left empty");

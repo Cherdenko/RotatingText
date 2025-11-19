@@ -1,16 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 36
+    buildToolsVersion = '30.0.3'
     defaultConfig {
         applicationId "com.sdsmdg.harjot.rotatingtextlibrary"
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    namespace "com.sdsmdg.harjot.rotatingtextlibrary"
     buildTypes {
         release {
             minifyEnabled false
@@ -20,6 +21,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation project(":rotatingtext")
 }

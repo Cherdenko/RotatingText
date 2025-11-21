@@ -13,12 +13,15 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.sdsmdg.harjot.rotatingtext.RotatingTextSwitcher;
@@ -51,35 +54,38 @@ public class MainActivity extends AppCompatActivity {
 
         rotatingTextSwitcher = new RotatingTextSwitcher(this);
 
-        //Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Raleway-Light.ttf");
-      //  Typeface typeface2 = Typeface.createFromAsset(getAssets(), "fonts/Reckoner_Bold.ttf");
-
         rotatingTextWrapper = findViewById(R.id.custom_switcher);
-        setRotating(rotatingTextWrapper,10);
-        /*rotatingTextWrapper.setSize(30);
-        rotatingTextWrapper.setTypeface(typeface2);
 
-//        rotatable = new Rotatable(Color.parseColor("#FFA036"), 1000, "Word00", "Word01", "Word02");
-        rotatable = new Rotatable(color , 1000, "rotating", "text", "library");
+        // Option 1: Use the modern countdown implementation
+        // setRotating(rotatingTextWrapper, 10);
+
+        // Option 2: Classic example with custom colors and typefaces
+        Typeface typeface = ResourcesCompat.getFont(this, R.font.love);
+
+        rotatingTextWrapper.setSize(30);
+        rotatingTextWrapper.setTypeface(typeface);
+
+        // Example with color array
+        rotatable = new Rotatable(color, 1000, "rotating", "text", "library");
         rotatable.setSize(25);
         rotatable.setTypeface(typeface);
         rotatable.setInterpolator(new AccelerateInterpolator());
         rotatable.setAnimationDuration(500);
-*//*
+
         rotatable2 = new Rotatable(Color.parseColor("#123456"), 1000, "word", "word01", "word02");
         rotatable2.setSize(25);
         rotatable2.setTypeface(typeface);
         rotatable2.setInterpolator(new DecelerateInterpolator());
         rotatable2.setAnimationDuration(500);
-*/
-        //word = rotatable.getTextAt(0);
 
-       // rotatingTextWrapper.setContent("?abc ? abc", rotatable, rotatable2);
-//        rotatingTextWrapper.setContent("? abc", rotatable);
+        word = rotatable.getTextAt(0);
+
+        // Use multiple rotatables
+        rotatingTextWrapper.setContent("?abc ? abc", rotatable, rotatable2);
+        // Or use single rotatable
+        // rotatingTextWrapper.setContent("? abc", rotatable);
 
         s1 = (Spinner) findViewById(R.id.spinner);
-
-/*
 
         List<Integer> list = new ArrayList<Integer>();
         list.add(1);
@@ -132,27 +138,52 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 boolean apply = rotatable.getApplyHorizontal();
                 rotatable.setApplyHorizontal(!apply);
-                rotatable2.setApplyHorizontal(!apply);
+                if (rotatable2 != null) {
+                    rotatable2.setApplyHorizontal(!apply);
+                }
             }
         });
 
- */
+        // Add button to toggle stopAtLast feature
+        Button stopAtLastButton = findViewById(R.id.stop_at_last_button);
+        stopAtLastButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean currentStopAtLast = rotatingTextWrapper.isStopAtLast();
+                rotatingTextWrapper.setStopAtLast(!currentStopAtLast);
+
+                // Restart the rotation to apply the change
+                if (rotatingTextWrapper.getSwitcherList().size() > 0) {
+                    rotatingTextWrapper.resume(0);
+                }
+            }
+        });
     }
 
     private void setRotating(RotatingTextWrapper wrapper, int toCount) {
-
         Typeface typeface = ResourcesCompat.getFont(this, R.font.love);
-        wrapper.setSize(38);
+
         wrapper.setTypeface(typeface);
-        //Log.d(TAG, Arrays.toString(createTextListForInteger(toCount)));
-        Rotatable rotatable = new Rotatable(Color.parseColor("#FFA036"), 1000, "1","2","3");
-        rotatable.setAnimationDuration(500);
+
+        // Create array of numbers from 0 to toCount
+        rotatable = new Rotatable(
+                ContextCompat.getColor(this, android.R.color.black),
+                200,  // 200ms between transitions
+                createTextListForInteger(toCount)
+        );
+        rotatable.setCycles(0);
+        rotatable.setSize(38);
+        rotatable.setStopAtLast(true);  // Stop at last number
+        rotatable.setAnimationDuration(200);
         rotatable.setCenter(true);
         rotatable.setTypeface(typeface);
-        rotatable.setInterpolator(new BounceInterpolator());
+        rotatable.setInterpolator(new LinearInterpolator());  // Smooth linear animation
+        rotatable.setLastInterpolator(new BounceInterpolator());  // Bounce on final number!
+
+        // Store the first word for cycles feature
+        word = rotatable.getTextAt(0);
 
         wrapper.setContent("?", rotatable);
-
     }
 
     private String[] createTextListForInteger(int n) {

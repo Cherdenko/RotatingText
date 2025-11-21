@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -11,7 +12,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp" />
+        android:layout_marginLeft="10dp"
+        app:textSize="38sp"
+        app:stopAtLast="true"
+        app:previewText="0 1 2 3..."
+        app:adaptable="false" />
 
     <LinearLayout
         android:id="@+id/replaceLayout"
@@ -91,6 +96,15 @@
             android:layout_height="wrap_content"
             android:text="Set"
             android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            />
+
+        <Button
+            android:id="@+id/stop_at_last_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Toggle Stop at Last"
+            android:layout_above="@id/set_button"
             android:layout_alignParentRight="true"
             />
     </RelativeLayout>

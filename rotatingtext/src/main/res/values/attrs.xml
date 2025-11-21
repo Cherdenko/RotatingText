@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RotatingTextWrapper">
+        <!-- Text size for the wrapper text (non-rotating text) in sp -->
+        <attr name="textSize" format="dimension" />
+
+        <!-- Whether to stop rotation at the last word instead of cycling -->
+        <attr name="stopAtLast" format="boolean" />
+
+        <!-- Preview text to show in Android Studio layout editor -->
+        <attr name="previewText" format="string" />
+
+        <!-- Text color for the wrapper -->
+        <attr name="textColor" format="color" />
+
+        <!-- Whether the text should be adaptable to parent width -->
+        <attr name="adaptable" format="boolean" />
+    </declare-styleable>
+</resources>

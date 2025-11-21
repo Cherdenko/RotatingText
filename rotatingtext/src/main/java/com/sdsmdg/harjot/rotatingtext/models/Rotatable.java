@@ -29,6 +29,7 @@ public class Rotatable {
     private Path pathIn, pathOut;
 
     private Interpolator interpolator = new LinearInterpolator();
+    private Interpolator lastInterpolator = null;  // Special interpolator for last word animation
 
     private Typeface typeface;
 
@@ -42,6 +43,8 @@ public class Rotatable {
     private String initialWord = "";
 
     private boolean applyHorizontal = false;
+
+    private boolean stopAtLast = false;
 
     public Rotatable(int updateDuration, String... text) {
         this.updateDuration = updateDuration;
@@ -115,6 +118,14 @@ public class Rotatable {
 
     public boolean getApplyHorizontal() {
         return applyHorizontal;
+    }
+
+    public void setStopAtLast(boolean stopAtLast) {
+        this.stopAtLast = stopAtLast;
+    }
+
+    public boolean isStopAtLast() {
+        return stopAtLast;
     }
 
     public String[] getText() {
@@ -204,9 +215,17 @@ public class Rotatable {
     }
 
     public int getNextWordNumber() {
-        //provides next word number circularly
+        //provides next word number circularly, or stops at last if stopAtLast is true
+        if (stopAtLast && currentWordNumber == text.length - 1) {
+            // Already at last word, don't advance
+            return currentWordNumber;
+        }
         currentWordNumber = (currentWordNumber + 1) % text.length;
         return currentWordNumber;
+    }
+
+    public boolean isAtLastWord() {
+        return currentWordNumber == text.length - 1;
     }
 
     public String peekNextWord() {
@@ -280,6 +299,40 @@ public class Rotatable {
     public void setInterpolator(Interpolator interpolator) {
         this.interpolator = interpolator;
         setUpdated(true);
+    }
+
+    /**
+     * Set a special interpolator to use when animating to the last word.
+     * This is especially useful with stopAtLast to create a distinctive finishing animation.
+     *
+     * @param lastInterpolator the interpolator to use for the last rotation, or null to use default
+     */
+    public void setLastInterpolator(Interpolator lastInterpolator) {
+        this.lastInterpolator = lastInterpolator;
+        setUpdated(true);
+    }
+
+    /**
+     * Get the interpolator used for the last word animation.
+     *
+     * @return the last interpolator, or null if using default
+     */
+    public Interpolator getLastInterpolator() {
+        return lastInterpolator;
+    }
+
+    /**
+     * Get the appropriate interpolator for the current animation.
+     * Returns lastInterpolator if set and animating to last word, otherwise returns regular interpolator.
+     *
+     * @param isAnimatingToLast whether we're animating to the last word
+     * @return the interpolator to use
+     */
+    public Interpolator getActiveInterpolator(boolean isAnimatingToLast) {
+        if (isAnimatingToLast && lastInterpolator != null) {
+            return lastInterpolator;
+        }
+        return interpolator;
     }
 
     public Typeface getTypeface() {

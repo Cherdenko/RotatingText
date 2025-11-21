@@ -1,6 +1,7 @@
 package com.sdsmdg.harjot.rotatingtext;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -10,11 +11,13 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sdsmdg.harjot.rotatingtext.models.Rotatable;
 import com.sdsmdg.harjot.rotatingtext.utils.Utils;
+import com.sdsmdg.harjot.rotatingtextlibrary.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +47,8 @@ public class RotatingTextWrapper extends RelativeLayout {
 
     private double changedSize = 0;
     private boolean adaptable = false;
+    private boolean stopAtLast = false;
+    private String previewText = "";
 
     public RotatingTextWrapper(Context context) {
         super(context);
@@ -53,11 +58,52 @@ public class RotatingTextWrapper extends RelativeLayout {
     public RotatingTextWrapper(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
+        initAttributes(attrs);
     }
 
     public RotatingTextWrapper(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
+        initAttributes(attrs);
+    }
+
+    private void initAttributes(AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RotatingTextWrapper);
+
+            // Read text size (getDimensionPixelSize returns px, convert to sp for consistency)
+            if (a.hasValue(R.styleable.RotatingTextWrapper_textSize)) {
+                // getDimension returns pixels, we need to convert to SP
+                float textSizePx = a.getDimension(R.styleable.RotatingTextWrapper_textSize, size * getResources().getDisplayMetrics().scaledDensity);
+                // Convert pixels to SP (don't cast to int to avoid precision loss)
+                size = Math.round(textSizePx / getResources().getDisplayMetrics().scaledDensity);
+            }
+
+            // Read stopAtLast flag
+            stopAtLast = a.getBoolean(R.styleable.RotatingTextWrapper_stopAtLast, false);
+
+            // Read preview text
+            previewText = a.getString(R.styleable.RotatingTextWrapper_previewText);
+            if (previewText == null) {
+                previewText = "";
+            }
+
+            // Read adaptable flag
+            adaptable = a.getBoolean(R.styleable.RotatingTextWrapper_adaptable, false);
+
+            a.recycle();
+
+            // Show preview text in layout editor if available
+            if (isInEditMode() && !TextUtils.isEmpty(previewText)) {
+                TextView previewTextView = new TextView(context);
+                previewTextView.setText(previewText);
+                previewTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+                if (typeface != null) {
+                    previewTextView.setTypeface(typeface);
+                }
+                addView(previewTextView);
+            }
+        }
     }
 
     public void setContent(String text, Rotatable... rotatables) {
@@ -66,6 +112,14 @@ public class RotatingTextWrapper extends RelativeLayout {
         switcherList = new ArrayList<>();
         textViews = new ArrayList<>();
         Collections.addAll(rotatableList, rotatables);
+
+        // Apply stopAtLast to all rotatables if set from XML
+        if (stopAtLast) {
+            for (Rotatable rotatable : rotatableList) {
+                rotatable.setStopAtLast(true);
+            }
+        }
+
         isContentSet = true;
         requestLayout();
     }
@@ -74,6 +128,14 @@ public class RotatingTextWrapper extends RelativeLayout {
         this.text = text;
         rotatableList = new ArrayList<>(rotatables);
         switcherList = new ArrayList<>();
+
+        // Apply stopAtLast to all rotatables if set from XML
+        if (stopAtLast) {
+            for (Rotatable rotatable : rotatableList) {
+                rotatable.setStopAtLast(true);
+            }
+        }
+
         isContentSet = true;
         requestLayout();
     }
@@ -119,7 +181,7 @@ public class RotatingTextWrapper extends RelativeLayout {
                 } else {
                     textView.setId(View.generateViewId());
                 }
-                textView.setTextSize(size);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
                 textViews.add(textView);
 
                 if (typeface != null)
@@ -287,8 +349,8 @@ public class RotatingTextWrapper extends RelativeLayout {
         }
     }
 
-    
-  
+
+
 
     private void setChanges(RotatingTextSwitcher switcher, Rotatable toChange) {
         switcher.setText(toChange.getLargestWordWithSpace());
@@ -298,7 +360,7 @@ public class RotatingTextWrapper extends RelativeLayout {
             else reduceSize(changedSize / getSize());
         }
 
-   
+
     }
 
     private int availablePixels() {
@@ -343,7 +405,7 @@ public class RotatingTextWrapper extends RelativeLayout {
 
         }
         for (TextView id : textViews) {
-            id.setTextSize((float) newWrapperSize);
+            id.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) newWrapperSize);
 
         }
         MarginLayoutParams margins = MarginLayoutParams.class.cast(getLayoutParams());
@@ -400,5 +462,61 @@ public class RotatingTextWrapper extends RelativeLayout {
 
     public List<RotatingTextSwitcher> getSwitcherList() {
         return switcherList;
+    }
+
+    /**
+     * Set whether rotation should stop at the last word instead of cycling back to the first.
+     * This will apply to all rotatables in this wrapper.
+     *
+     * @param stopAtLast true to stop at last word, false to cycle infinitely
+     */
+    public void setStopAtLast(boolean stopAtLast) {
+        this.stopAtLast = stopAtLast;
+        if (rotatableList != null) {
+            for (Rotatable rotatable : rotatableList) {
+                rotatable.setStopAtLast(stopAtLast);
+            }
+        }
+    }
+
+    /**
+     * Get whether rotation stops at the last word.
+     *
+     * @return true if rotation stops at last word, false if it cycles infinitely
+     */
+    public boolean isStopAtLast() {
+        return stopAtLast;
+    }
+
+    /**
+     * Set the preview text that will be displayed in the Android Studio layout editor.
+     *
+     * @param previewText the text to show in the layout editor
+     */
+    public void setPreviewText(String previewText) {
+        this.previewText = previewText;
+    }
+
+    /**
+     * Get the preview text.
+     *
+     * @return the preview text
+     */
+    public String getPreviewText() {
+        return previewText;
+    }
+
+    /**
+     * Set a special interpolator to use when animating to the last word for all rotatables.
+     * This is especially useful with stopAtLast to create a distinctive finishing animation.
+     *
+     * @param lastInterpolator the interpolator to use for the last rotation, or null to use default
+     */
+    public void setLastInterpolator(Interpolator lastInterpolator) {
+        if (rotatableList != null) {
+            for (Rotatable rotatable : rotatableList) {
+                rotatable.setLastInterpolator(lastInterpolator);
+            }
+        }
     }
 }

@@ -127,10 +127,20 @@ public class RotatingTextSwitcher extends TextView {
                             pauseRender();
                         }
                         else {
+                            // Check if we should stop at last word
+                            if (rotatable.isStopAtLast() && rotatable.isAtLastWord()) {
+                                isPaused = true;
+                                pauseRender();
+                                return;
+                            }
+
+                            // Check if next word will be the last word
+                            boolean isAnimatingToLast = rotatable.peekNextWord().equals(rotatable.getTextAt(rotatable.getWordCount() - 1));
+
                             animationInterface.setAnimationRunning(true);
                             resumeRender();
-                            animateInHorizontal();
-                            animateOutHorizontal();
+                            animateInHorizontal(isAnimatingToLast);
+                            animateOutHorizontal(isAnimatingToLast);
                             oldText = currentText;
                             currentText = rotatable.getNextWord();
                         }
@@ -165,15 +175,19 @@ public class RotatingTextSwitcher extends TextView {
 
                 if (rotatable.getPathOut() != null) {
                     canvas.drawTextOnPath(oldText, rotatable.getPathOut(), 0.0f, 0.0f, paint);
-                if(number < arrayLength && rotatable.useArray()) {
-                    paint.setColor(rotatable.getColorFromArray(number));
-                }
+                    if(number < arrayLength && rotatable.useArray()) {
+                        paint.setColor(rotatable.getColorFromArray(number));
+                    }
                 }
             }
         }
     }
 
     private void animateInHorizontal() {
+        animateInHorizontal(false);
+    }
+
+    private void animateInHorizontal(boolean isAnimatingToLast) {
         ValueAnimator animator;
         if(!rotatable.getApplyHorizontal()) {
             animator = ValueAnimator.ofFloat(0.0f, getHeight());
@@ -207,12 +221,17 @@ public class RotatingTextSwitcher extends TextView {
                 animationInterface.setAnimationRunning(false);
             }
         });
-        animator.setInterpolator(rotatable.getInterpolator());
+        // Use last interpolator if animating to last word and it's set
+        animator.setInterpolator(rotatable.getActiveInterpolator(isAnimatingToLast));
         animator.setDuration(rotatable.getAnimationDuration());
         animator.start();
     }
 
     private void animateOutHorizontal() {
+        animateOutHorizontal(false);
+    }
+
+    private void animateOutHorizontal(boolean isAnimatingToLast) {
         ValueAnimator animator;
         if(!rotatable.getApplyHorizontal()) {
             animator = ValueAnimator.ofFloat(getHeight(), getHeight() * 2.0f);
@@ -238,7 +257,8 @@ public class RotatingTextSwitcher extends TextView {
                 }
             });
         }
-        animator.setInterpolator(rotatable.getInterpolator());
+        // Use last interpolator if animating to last word and it's set
+        animator.setInterpolator(rotatable.getActiveInterpolator(isAnimatingToLast));
         animator.setDuration(rotatable.getAnimationDuration());
         animator.start();
     }
@@ -385,12 +405,22 @@ public class RotatingTextSwitcher extends TextView {
                             }
 
                             else {
+                                // Check if we should stop at last word
+                                if (rotatable.isStopAtLast() && rotatable.isAtLastWord()) {
+                                    isPaused = true;
+                                    pauseRender();
+                                    return;
+                                }
+
+                                // Check if next word will be the last word
+                                boolean isAnimatingToLast = rotatable.peekNextWord().equals(rotatable.getTextAt(rotatable.getWordCount() - 1));
+
                                 oldText = currentText;
                                 currentText = rotatable.getNextWord();
                                 animationInterface.setAnimationRunning(true);
                                 resumeRender();
-                                animateInHorizontal();
-                                animateOutHorizontal();
+                                animateInHorizontal(isAnimatingToLast);
+                                animateOutHorizontal(isAnimatingToLast);
                             }
                         }
                     }

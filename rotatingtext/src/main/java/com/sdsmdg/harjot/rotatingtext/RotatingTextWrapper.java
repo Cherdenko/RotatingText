@@ -50,6 +50,7 @@ public class RotatingTextWrapper extends RelativeLayout {
     private boolean stopAtLast = false;
     private String previewText = "";
 
+
     public RotatingTextWrapper(Context context) {
         super(context);
         this.context = context;
@@ -124,6 +125,8 @@ public class RotatingTextWrapper extends RelativeLayout {
         requestLayout();
     }
 
+
+
     public void setContent(String text, ArrayList<Rotatable> rotatables) {
         this.text = text;
         rotatableList = new ArrayList<>(rotatables);
@@ -150,6 +153,7 @@ public class RotatingTextWrapper extends RelativeLayout {
 
             if (array.length == 0) {
                 final RotatingTextSwitcher textSwitcher = new RotatingTextSwitcher(context);
+
                 switcherList.add(textSwitcher);
 
                 textSwitcher.setRotatable(rotatableList.get(0));
@@ -168,6 +172,7 @@ public class RotatingTextWrapper extends RelativeLayout {
                 lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
                 addView(textSwitcher, lp);
+
 
             }
 
@@ -348,8 +353,6 @@ public class RotatingTextWrapper extends RelativeLayout {
             }
         }
     }
-
-
 
 
     private void setChanges(RotatingTextSwitcher switcher, Rotatable toChange) {

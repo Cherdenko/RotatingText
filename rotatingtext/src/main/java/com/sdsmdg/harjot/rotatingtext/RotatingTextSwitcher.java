@@ -50,6 +50,7 @@ public class RotatingTextSwitcher extends TextView {
 
     private boolean isPaused = false;
 
+
     public RotatingTextSwitcher(Context context) {
         super(context);
         this.context = context;
@@ -120,6 +121,7 @@ public class RotatingTextSwitcher extends TextView {
         updateWordTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -433,5 +435,6 @@ public class RotatingTextSwitcher extends TextView {
     public boolean isPaused() {
         return isPaused;
     }
+    
 
 }
